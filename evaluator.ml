@@ -10,6 +10,25 @@ type expr =
   | Succ of expr                    (* succ e *)
   | ElimNat of expr * expr * expr * expr  (* elimNat e1 e2 e3 e4 *)
 
+(* Print the expression structure *)
+let rec dump_expr e =
+  match e with
+  | Var x -> Printf.sprintf "Var(%s)" x
+  | Star -> "Star"
+  | Pi (x, tau1, tau2) ->
+      Printf.sprintf "Pi(%s, %s, %s)" x (dump_expr tau1) (dump_expr tau2)
+  | Lambda (x, tau1, e2) ->
+      Printf.sprintf "Lambda(%s, %s, %s)" x (dump_expr tau1) (dump_expr e2)
+  | App (e1, e2) ->
+      Printf.sprintf "App(%s, %s)" (dump_expr e1) (dump_expr e2)
+  | Nat -> "Nat"
+  | Zero -> "Zero"
+  | Succ e1 -> Printf.sprintf "Succ(%s)" (dump_expr e1)
+  | ElimNat (e1, e2, e3, e4) ->
+      Printf.sprintf "ElimNat(%s, %s, %s, %s)"
+        (dump_expr e1) (dump_expr e2) (dump_expr e3) (dump_expr e4)
+
+
 (* Define the environment *)
 type environment = (string * expr) list
 
@@ -196,102 +215,25 @@ let rec eval e =
   else
     eval e'
 
-(* Type equality, accounting for evaluation *)
-let rec equal_types t1 t2 =
-  let t1' = eval t1 in
-  let t2' = eval t2 in
-  t1' = t2'
 
-(* Type checking *)
-let rec type_check env expr =
-  match expr with
-  | Var x ->
-      begin match lookup env x with
-      | Some ty -> Some ty
-      | None -> None
-      end
-  | Star ->
-      Some Star
-  | Pi (x, tau1, tau2) ->
-      begin match type_check env tau1 with
-      | Some Star ->
-          let env' = (x, tau1) :: env in
-          begin match type_check env' tau2 with
-          | Some Star -> Some Star
-          | _ -> None
-          end
-      | _ -> None
-      end
-  | Lambda (x, tau1, e2) ->
-      begin match type_check env tau1 with
-      | Some Star ->
-          let env' = (x, tau1) :: env in
-          begin match type_check env' e2 with
-          | Some tau2 ->
-              Some (Pi (x, tau1, tau2))
-          | None -> None
-          end
-      | _ -> None
-      end
-  | App (e1, e2) ->
-      begin match type_check env e1 with
-      | Some Pi (x, tau1, tau2) ->
-          begin match type_check env e2 with
-          | Some tau1' ->
-              if equal_types tau1 tau1' then
-                Some (eval (substitute tau2 x e2))
-              else
-                None
-          | _ -> None
-          end
-      | _ -> None  (* e1 is not a function *)
-      end
-  | Nat ->
-      Some Star
-  | Zero ->
-      Some Nat
-  | Succ e1 ->
-      begin match type_check env e1 with
-      | Some Nat -> Some Nat
-      | _ -> None
-      end
-  | ElimNat (e1, e2, e3, e4) ->
-      (* Check that e1 : ℕ → ★ *)
-      begin match type_check env e1 with
-      | Some Pi (_, Nat, Star) ->
-          (* Check that e2 : e1 0 *)
-          let ty_e1_zero = App (e1, Zero) in
-          begin match type_check env e2 with
-          | Some ty_e2 ->
-              if equal_types ty_e2 ty_e1_zero then
-                (* Check that e3 : (x : ℕ) → e1 x → e1 (succ x) *)
-                let x = "x" in
-                let ty_e1_x = App (e1, Var x) in
-                let ty_e1_succ_x = App (e1, Succ (Var x)) in
-                let ty_e3_expected = Pi (x, Nat, Pi ("_", ty_e1_x, ty_e1_succ_x)) in
-                begin
-                  let env' = (x, Nat) :: env in
-                  match type_check env' e3 with
-                  | Some ty_e3 ->
-                      if equal_types ty_e3 ty_e3_expected then
-                        (* Check that e4 : ℕ *)
-                        begin match type_check env e4 with
-                        | Some Nat ->
-                            (* Result type is e1 e4 *)
-                            Some (App (e1, e4))
-                        | _ -> None
-                        end
-                      else
-                        None
-                  | _ -> None
-                end
-              else
-                None
-          | _ -> None
-          end
-      | _ -> None
-      end
-  | _ -> None  (* Other cases not handled *)
+let () =
+  let identity = Lambda ("x", Nat, Var "x") in
+  let expr1 = App (identity, Zero) in
+  Printf.printf "Dumped expression: %s\n" (dump_expr expr1)
 
+let () =
+  let double = Lambda ("x", Nat, Succ (Succ (Var "x"))) in
+  let process_nat =
+    Lambda ("n", Nat,
+      ElimNat (
+        Pi ("m", Nat, Star),
+        Star,
+        Lambda ("m", Nat, Lambda ("_", Pi ("_", Nat, Star), Star)),
+        Var "n"
+      )
+    )
+  in
+  let expr = App (process_nat, App (double, Zero)) in
+  Printf.printf "Dumped expression: %s\n" (dump_expr expr)
 
 

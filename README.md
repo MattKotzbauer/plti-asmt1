@@ -4,8 +4,8 @@ Base implementation of DTLC using Python data classes and CAS. Includes evaluato
 
 **Files**: 
 
-* driver.py: driver code for type system, evaluation, type checking, and alpha equivalence checks. Also includes a base case test of identity function
+* `driver.py`: driver code for type system, evaluation, type checking, and alpha equivalence checks. Also includes a base case test of identity function
 
-* tests.ipynb: suite of test cases for driver script
+* `tests.ipynb`: suite of test cases for driver script
 
 

@@ -204,7 +204,7 @@ def alpha_equal(e1: Expr, e2: Expr, mapping=None) -> bool:
     if isinstance(e1, Var) and isinstance(e2, Var):
         mapped = mapping.get(e1.name, e1.name)
         if mapped != e2.name:
-            print(f"Var mismatch: {e1.name} mapped to {mapped} vs {e2.name}")
+            # print(f"Var mismatch: {e1.name} mapped to {mapped} vs {e2.name}")
             return False
         return True
     elif isinstance(e1, Type) and isinstance(e2, Type):

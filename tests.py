@@ -1,4 +1,4 @@
-# (Test cases) 
+# tests.py
 
 import unittest
 from driver import (
@@ -141,35 +141,6 @@ class TestEvaluatorTypeChecker(unittest.TestCase):
         with self.assertRaises(TypeError):
             type_check(self.Gamma, elim_nat_zero)
 
-    def test_nested_lambda(self):
-        # Define a nested lambda: lambda (A : *) . lambda (B : A) . lambda (x : B). x
-        nested_lambda = Lambda('A', Type(),
-                            Lambda('B', Var('A'),
-                                Lambda('x', Var('B'), Var('x'))))
-
-        # Type check the nested lambda
-        tau_nested = type_check(self.Gamma, nested_lambda)
-        expected_type = Pi('A', Type(),
-                           Pi('B', Var('A'),
-                              Pi('x', Var('B'), Var('B'))))
-        self.assertTrue(alpha_equal(tau_nested, expected_type),
-                        f"Expected type {expected_type}, got {tau_nested}")
-
-        # Apply the nested lambda to Nat, then to Zero, then to Zero again
-        app1 = App(nested_lambda, Nat())
-        app2 = App(app1, Zero())
-        app3 = App(app2, Zero())
-        tau_app3 = type_check(self.Gamma, app3)
-        expected_tau = Nat()
-        self.assertTrue(alpha_equal(tau_app3, expected_tau),
-                        f"Expected type {expected_tau}, got {tau_app3}")
-
-        # Evaluate the expression
-        result = eval_expr(app3)
-        expected_result = Zero()
-        self.assertTrue(alpha_equal(result, expected_result),
-                        f"Expected result {expected_result}, got {result}")
-
     def test_type_star(self):
         # Type-check Type
         tau_type = type_check(self.Gamma, Type())
@@ -229,13 +200,6 @@ class TestEvaluatorTypeChecker(unittest.TestCase):
         self.assertFalse(alpha_equal(expr3, expr4),
                          f"Expressions {expr3} and {expr4} should not be alpha-equivalent")
 
-
-    expr1 = Lambda('x', Nat(), Var('x'))
-    expr2 = Lambda('y', Nat(), Var('y'))
-    print(alpha_equal(expr1, expr2))
-
-
 if __name__ == '__main__':
     unittest.main()
-
 

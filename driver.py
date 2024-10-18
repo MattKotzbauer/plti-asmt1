@@ -407,12 +407,12 @@ def eval_expr(e: Expr) -> Expr:
                 break
     return e
 
-# Test cases
+# Polymorphic Identity Check
 def main():
     # Empty environment
     Gamma = []
 
-    # Define the polymorphic identity function
+    # Define polymorphic identity function
     id_expr = Lambda('A', Type(), Lambda('x', Var('A'), Var('x')))
 
     # Type check the identity function
@@ -437,6 +437,7 @@ def main():
     result = eval_expr(id_nat_zero)
     print("Result of id Nat 0:", result)
 
+# (Encapsulate execution)
 if __name__ == "__main__":
     main()
 

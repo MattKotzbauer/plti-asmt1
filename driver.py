@@ -197,24 +197,29 @@ def substitute(e1: Expr, x: str, e2: Expr) -> Expr:
         return e1
 
 def alpha_equal(e1: Expr, e2: Expr, mapping=None) -> bool:
-    # Check if two expressions are alpha-equivalent
+    """Check if two expressions are alpha-equivalent."""
     if mapping is None:
         mapping = {}
+    
     if isinstance(e1, Var) and isinstance(e2, Var):
-        return mapping.get(e1.name, e1.name) == e2.name
+        mapped = mapping.get(e1.name, e1.name)
+        if mapped != e2.name:
+            # print(f"Var mismatch: {e1.name} mapped to {mapped} vs {e2.name}")
+            return False
+        return True
     elif isinstance(e1, Type) and isinstance(e2, Type):
         return True
     elif isinstance(e1, Pi) and isinstance(e2, Pi):
-        new_var = fresh_var(e1.x, set(mapping.values()).union({e2.x}))
+        # Directly map e1.x to e2.x
         mapping_copy = mapping.copy()
-        mapping_copy[e1.x] = new_var
-        return (alpha_equal(e1.tau1, e2.tau1, mapping) and
+        mapping_copy[e1.x] = e2.x
+        return (alpha_equal(e1.tau1, e2.tau1, mapping_copy) and
                 alpha_equal(e1.tau2, e2.tau2, mapping_copy))
     elif isinstance(e1, Lambda) and isinstance(e2, Lambda):
-        new_var = fresh_var(e1.x, set(mapping.values()).union({e2.x}))
+        # Directly map e1.x to e2.x
         mapping_copy = mapping.copy()
-        mapping_copy[e1.x] = new_var
-        return (alpha_equal(e1.tau1, e2.tau1, mapping) and
+        mapping_copy[e1.x] = e2.x
+        return (alpha_equal(e1.tau1, e2.tau1, mapping_copy) and
                 alpha_equal(e1.e2, e2.e2, mapping_copy))
     elif isinstance(e1, App) and isinstance(e2, App):
         return (alpha_equal(e1.e1, e2.e1, mapping) and
@@ -231,12 +236,13 @@ def alpha_equal(e1: Expr, e2: Expr, mapping=None) -> bool:
                 alpha_equal(e1.e3, e2.e3, mapping) and
                 alpha_equal(e1.e4, e2.e4, mapping))
     else:
+        print(f"Expression mismatch: {e1} vs {e2}")
         return False
 
 def type_check(Gamma: Environment, e: Expr) -> Expr:
     # Type checker: type check e in environment Gamma and return its type
     if isinstance(e, Var):
-        # Type-Var-Ref
+       # Type-Var-Ref
         for name, tau in reversed(Gamma):
             if name == e.name:
                 return tau
@@ -440,5 +446,6 @@ def main():
 # (Encapsulate execution)
 if __name__ == "__main__":
     main()
+
 
 

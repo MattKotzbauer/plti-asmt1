@@ -213,20 +213,17 @@ def alpha_equal(e1: Expr, e2: Expr, mapping=None) -> bool:
         # Directly map e1.x to e2.x
         mapping_copy = mapping.copy()
         mapping_copy[e1.x] = e2.x
-        tau1_eq = alpha_equal(e1.tau1, e2.tau1, mapping_copy)
-        tau2_eq = alpha_equal(e1.tau2, e2.tau2, mapping_copy)
-        return tau1_eq and tau2_eq
+        return (alpha_equal(e1.tau1, e2.tau1, mapping_copy) and
+                alpha_equal(e1.tau2, e2.tau2, mapping_copy))
     elif isinstance(e1, Lambda) and isinstance(e2, Lambda):
         # Directly map e1.x to e2.x
         mapping_copy = mapping.copy()
         mapping_copy[e1.x] = e2.x
-        tau1_eq = alpha_equal(e1.tau1, e2.tau1, mapping_copy)
-        e2_eq = alpha_equal(e1.e2, e2.e2, mapping_copy)
-        return tau1_eq and e2_eq
+        return (alpha_equal(e1.tau1, e2.tau1, mapping_copy) and
+                alpha_equal(e1.e2, e2.e2, mapping_copy))
     elif isinstance(e1, App) and isinstance(e2, App):
-        e1_eq = alpha_equal(e1.e1, e2.e1, mapping)
-        e2_eq = alpha_equal(e1.e2, e2.e2, mapping)
-        return e1_eq and e2_eq
+        return (alpha_equal(e1.e1, e2.e1, mapping) and
+                alpha_equal(e1.e2, e2.e2, mapping))
     elif isinstance(e1, Nat) and isinstance(e2, Nat):
         return True
     elif isinstance(e1, Zero) and isinstance(e2, Zero):
@@ -234,15 +231,13 @@ def alpha_equal(e1: Expr, e2: Expr, mapping=None) -> bool:
     elif isinstance(e1, Succ) and isinstance(e2, Succ):
         return alpha_equal(e1.e, e2.e, mapping)
     elif isinstance(e1, ElimNat) and isinstance(e2, ElimNat):
-        e1_eq = alpha_equal(e1.e1, e2.e1, mapping)
-        e2_eq = alpha_equal(e1.e2, e2.e2, mapping)
-        e3_eq = alpha_equal(e1.e3, e2.e3, mapping)
-        e4_eq = alpha_equal(e1.e4, e2.e4, mapping)
-        return e1_eq and e2_eq and e3_eq and e4_eq
+        return (alpha_equal(e1.e1, e2.e1, mapping) and
+                alpha_equal(e1.e2, e2.e2, mapping) and
+                alpha_equal(e1.e3, e2.e3, mapping) and
+                alpha_equal(e1.e4, e2.e4, mapping))
     else:
         print(f"Expression mismatch: {e1} vs {e2}")
         return False
-
 
 def type_check(Gamma: Environment, e: Expr) -> Expr:
     # Type checker: type check e in environment Gamma and return its type

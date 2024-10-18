@@ -1,17 +1,17 @@
 from dataclasses import dataclass
 from typing import List, Tuple, Set, Union
 
-# Define the base class for expressions
+# Base expression class (e): elements are then defined as the same order as in the PDF
 @dataclass
 class Expr:
     pass
 
-# Variable reference
+# Variable reference (x)
 @dataclass
 class Var(Expr):
     name: str
 
-# The type of types (*)
+# Type of types (*)
 @dataclass
 class Type(Expr):
     pass
@@ -63,7 +63,7 @@ class ElimNat(Expr):
 Environment = List[Tuple[str, Expr]]
 
 def fresh_var(name: str, avoid_vars: Set[str]) -> str:
-    """Generate a fresh variable name not in avoid_vars."""
+    # Generate a fresh variable name not in avoid_vars
     i = 1
     new_name = f"{name}_{i}"
     while new_name in avoid_vars:
@@ -72,7 +72,7 @@ def fresh_var(name: str, avoid_vars: Set[str]) -> str:
     return new_name
 
 def free_vars(e: Expr) -> Set[str]:
-    """Compute the set of free variables in expression e."""
+    # Compute the set of free variables in expression e
     if isinstance(e, Var):
         return {e.name}
     elif isinstance(e, Type):
@@ -101,7 +101,7 @@ def free_vars(e: Expr) -> Set[str]:
         raise TypeError(f"Unknown expression: {e}")
 
 def substitute_var(e: Expr, old_name: str, new_name: str) -> Expr:
-    """Substitute variable names to avoid capture (Alpha Conversion)."""
+    # Substitute variable names to avoid capture (Alpha Conversion)
     if isinstance(e, Var):
         if e.name == old_name:
             return Var(new_name)
@@ -140,7 +140,7 @@ def substitute_var(e: Expr, old_name: str, new_name: str) -> Expr:
         return e
 
 def substitute(e1: Expr, x: str, e2: Expr) -> Expr:
-    """Perform capture-avoiding substitution e1[x ↦ e2]."""
+    # Perform CAS for e1[x ↦ e2]
     if isinstance(e1, Var):
         if e1.name == x:
             return e2
@@ -197,7 +197,7 @@ def substitute(e1: Expr, x: str, e2: Expr) -> Expr:
         return e1
 
 def alpha_equal(e1: Expr, e2: Expr, mapping=None) -> bool:
-    """Check if two expressions are alpha-equivalent."""
+    # Check if two expressions are alpha-equivalent
     if mapping is None:
         mapping = {}
     if isinstance(e1, Var) and isinstance(e2, Var):
@@ -234,7 +234,7 @@ def alpha_equal(e1: Expr, e2: Expr, mapping=None) -> bool:
         return False
 
 def type_check(Gamma: Environment, e: Expr) -> Expr:
-    """Type check the expression e in environment Gamma and return its type."""
+    # Type checker: type check e in environment Gamma and return its type
     if isinstance(e, Var):
         # Type-Var-Ref
         for name, tau in reversed(Gamma):
@@ -326,7 +326,7 @@ def type_check(Gamma: Environment, e: Expr) -> Expr:
         raise TypeError(f"Unknown expression: {e}")
 
 def eval_expr(e: Expr) -> Expr:
-    """Evaluate expression e according to the evaluation rules."""
+    # Evaluator: simplify expression e according to the evaluation rules
     while True:
         if isinstance(e, App) and isinstance(e.e1, Lambda):
             # Eval-App: (\lambda x. e1) e2 => e1[x ↦ e2]

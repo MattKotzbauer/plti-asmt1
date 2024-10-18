@@ -1,4 +1,4 @@
-## Matt Kotzbauer: Python DTLC
+## CS2520r Assignment 1: Python DTLC
 
 Base implementation of DTLC using Python data classes and CAS. Includes evaluator, type checker, check for alpha equivalence, and some test cases.
 

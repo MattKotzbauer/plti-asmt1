@@ -230,9 +230,9 @@ class TestEvaluatorTypeChecker(unittest.TestCase):
                          f"Expressions {expr3} and {expr4} should not be alpha-equivalent")
 
 
-    expr1 = Lambda('x', Nat(), Var('x'))
-    expr2 = Lambda('y', Nat(), Var('y'))
-    print(alpha_equal(expr1, expr2))
+    #expr1 = Lambda('x', Nat(), Var('x'))
+    #expr2 = Lambda('y', Nat(), Var('y'))
+    #print(alpha_equal(expr1, expr2))
 
 
 if __name__ == '__main__':
